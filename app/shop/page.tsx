@@ -5,14 +5,17 @@ import ProductGrid from '@/components/ProductGrid';
 
 const categories = [
   'All',
-  'Sofas',
+  'Sofas & Couches',
+  'Chairs & Recliners',
   'Tables',
-  'Chairs',
-  'Recliners',
-  'Outdoor',
-  'Dressers',
-  'Beds',
-  'Storage'
+  'Beds & Mattresses',
+  'Dressers & Wardrobes',
+  'Desks',
+  'Cabinets & Storage',
+  'Bookshelves',
+  'Entertainment Centers',
+  'Outdoor Furniture',
+  'Other'
 ];
 
 export default function ShopPage() {
