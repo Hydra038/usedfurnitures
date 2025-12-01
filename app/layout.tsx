@@ -4,6 +4,7 @@ import { Merriweather } from 'next/font/google';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
 import Footer from '@/components/Footer';
 import NavigationLoader from '@/components/NavigationLoader';
+import ImageProtection from '@/components/ImageProtection';
 
 const merriweather = Merriweather({ 
   weight: ['300', '400', '700', '900'],
@@ -31,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={merriweather.className}>
+        <ImageProtection />
         <NavigationLoader />
         <ConditionalNavbar />
         <main className="min-h-screen">{children}</main>

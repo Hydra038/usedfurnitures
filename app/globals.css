@@ -97,4 +97,31 @@
   .animate-fade-in {
     animation: fade-in 0.3s ease-out;
   }
+
+  /* Image Protection - Prevent selection and dragging */
+  img {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    pointer-events: auto;
+  }
+
+  img::selection {
+    background: transparent;
+  }
+
+  img::-moz-selection {
+    background: transparent;
+  }
+
+  /* Protect product cards from selection */
+  .card img {
+    pointer-events: none;
+  }
 }
+

@@ -122,6 +122,9 @@ function AuthPageContent() {
       const { data, error } = await supabase.auth.signUp({
         email: trimmedEmail,
         password: password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
       });
       
       if (error) {
