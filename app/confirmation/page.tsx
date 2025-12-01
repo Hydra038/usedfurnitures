@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { CheckCircle, Package } from 'lucide-react';
@@ -28,7 +28,7 @@ interface PaymentMethodDetails {
   details: string;
 }
 
-export default function ConfirmationPage() {
+function ConfirmationPageContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
   const [order, setOrder] = useState<Order | null>(null);
@@ -201,5 +201,20 @@ export default function ConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading order details...</p>
+        </div>
+      </div>
+    }>
+      <ConfirmationPageContent />
+    </Suspense>
   );
 }

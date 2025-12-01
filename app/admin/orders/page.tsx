@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/utils/imageUrl';
-import { Eye } from 'lucide-react';
+import { Eye, Trash2, Download } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 
 interface Order {
@@ -77,6 +77,59 @@ export default function AdminOrdersPage() {
     }
   }
 
+  async function deleteOrder(orderId: string) {
+    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      // Update local state
+      setOrders(orders.filter(order => order.id !== orderId));
+      
+      // Close modal if this order was selected
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(null);
+      }
+      
+      alert('Order deleted successfully!');
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to delete order');
+    }
+  }
+
+  async function downloadPaymentProof(paymentProofUrl: string, customerName: string) {
+    try {
+      const imageUrl = getImageUrl(paymentProofUrl);
+      
+      // Fetch the image
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `payment-proof-${customerName.replace(/\s+/g, '-')}-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      alert('Payment proof downloaded successfully!');
+    } catch (error) {
+      console.error('Error downloading payment proof:', error);
+      alert('Failed to download payment proof');
+    }
+  }
+
   return (
     <div>
       <BackButton />
@@ -136,12 +189,25 @@ export default function AdminOrdersPage() {
                     </select>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => setSelectedOrder(order)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Eye className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setSelectedOrder(order)}
+                        className="text-blue-600 hover:text-blue-800 p-1"
+                        title="View Details"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteOrder(order.id);
+                        }}
+                        className="text-red-600 hover:text-red-800 p-1"
+                        title="Delete Order"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -177,8 +243,17 @@ export default function AdminOrdersPage() {
               
               {selectedOrder.payment_proof_url && (
                 <div>
-                  <span className="font-semibold">Payment Proof:</span>
-                  <div className="mt-2 relative w-full h-64">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-semibold">Payment Proof:</span>
+                    <button
+                      onClick={() => downloadPaymentProof(selectedOrder.payment_proof_url!, selectedOrder.customer_name)}
+                      className="flex items-center gap-2 px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </button>
+                  </div>
+                  <div className="mt-2 relative w-full h-64 border rounded-lg overflow-hidden">
                     <Image
                       src={getImageUrl(selectedOrder.payment_proof_url)}
                       alt="Payment proof"
@@ -212,8 +287,17 @@ export default function AdminOrdersPage() {
 
             <div className="flex gap-3">
               <button
+                onClick={() => {
+                  deleteOrder(selectedOrder.id);
+                }}
+                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Order
+              </button>
+              <button
                 onClick={() => setSelectedOrder(null)}
-                className="btn-secondary w-full"
+                className="btn-secondary flex-1"
               >
                 Close
               </button>

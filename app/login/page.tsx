@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, User, Phone, MapPin, Eye, EyeOff, AlertCircle, CheckCircle, PartyPopper } from "lucide-react";
 
 type AuthMode = 'login' | 'signup' | 'reset';
 
-export default function AuthPage() {
+function AuthPageContent() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -576,5 +576,20 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-blue-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AuthPageContent />
+    </Suspense>
   );
 }
