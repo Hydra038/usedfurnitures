@@ -11,6 +11,7 @@ interface PaymentMethod {
   details: string;
   is_enabled: boolean;
   display_order: number;
+  payment_link?: string;
 }
 
 export default function PaymentMethodsPage() {
@@ -24,6 +25,7 @@ export default function PaymentMethodsPage() {
   const [formMethodId, setFormMethodId] = useState('');
   const [formDetails, setFormDetails] = useState('');
   const [formEnabled, setFormEnabled] = useState(true);
+  const [formPaymentLink, setFormPaymentLink] = useState('');
 
   useEffect(() => {
     fetchPaymentMethods();
@@ -51,6 +53,7 @@ export default function PaymentMethodsPage() {
     setFormMethodId('');
     setFormDetails('');
     setFormEnabled(true);
+    setFormPaymentLink('');
     setShowModal(true);
   };
 
@@ -60,6 +63,7 @@ export default function PaymentMethodsPage() {
     setFormMethodId(method.method_id);
     setFormDetails(method.details);
     setFormEnabled(method.is_enabled);
+    setFormPaymentLink(method.payment_link || '');
     setShowModal(true);
   };
 
@@ -77,6 +81,7 @@ export default function PaymentMethodsPage() {
             method_id: formMethodId,
             details: formDetails,
             is_enabled: formEnabled,
+            payment_link: formPaymentLink || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingMethod.id);
@@ -92,6 +97,7 @@ export default function PaymentMethodsPage() {
             method_id: formMethodId,
             details: formDetails,
             is_enabled: formEnabled,
+            payment_link: formPaymentLink || null,
             display_order: methods.length + 1,
           });
 
@@ -383,6 +389,19 @@ export default function PaymentMethodsPage() {
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Username, email, phone, or other identifier
+                </p>
+              </div>
+              <div>
+                <label className="block mb-2 font-semibold text-sm sm:text-base">Payment Link (Optional)</label>
+                <input
+                  type="text"
+                  value={formPaymentLink}
+                  onChange={(e) => setFormPaymentLink(e.target.value)}
+                  className="input-field"
+                  placeholder="e.g., venmo://paycharge?txn=pay&recipients=username"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Direct payment link or deep link (for Venmo: venmo://paycharge?txn=pay&recipients=yourusername)
                 </p>
               </div>
               <div className="flex items-center gap-2">

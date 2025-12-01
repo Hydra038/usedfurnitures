@@ -14,6 +14,7 @@ interface PaymentMethod {
   method_id: string;
   details: string;
   is_enabled: boolean;
+  payment_link?: string;
 }
 
 export default function CheckoutPage() {
@@ -516,6 +517,24 @@ export default function CheckoutPage() {
                             <p className="text-red-500 text-sm mt-1">
                               ⚠️ Please select a payment method to continue
                             </p>
+                          )}
+                          
+                          {/* Payment Link Button */}
+                          {paymentMethod && paymentMethods.find(m => m.method_id === paymentMethod)?.payment_link && (
+                            <div className="mt-3">
+                              <a
+                                href={paymentMethods.find(m => m.method_id === paymentMethod)?.payment_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold transition-colors"
+                              >
+                                <CreditCard className="w-5 h-5" />
+                                Open {paymentMethods.find(m => m.method_id === paymentMethod)?.name}
+                              </a>
+                              <p className="text-xs text-gray-500 mt-2">
+                                Click to open {paymentMethods.find(m => m.method_id === paymentMethod)?.name} and complete your payment
+                              </p>
+                            </div>
                           )}
                         </div>
                       </>
