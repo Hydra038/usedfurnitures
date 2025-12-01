@@ -344,11 +344,17 @@ export default function UserOrdersPage() {
               {selectedOrder.shipping_address && (
                 <div>
                   <span className="font-semibold text-gray-700">Shipping Address:</span>
-                  <p className="text-gray-600 mt-1 whitespace-pre-line">
-                    {typeof selectedOrder.shipping_address === 'string' 
-                      ? selectedOrder.shipping_address 
-                      : JSON.stringify(selectedOrder.shipping_address, null, 2)}
-                  </p>
+                  <div className="mt-2 bg-gray-50 p-3 rounded-lg">
+                    <p className="text-gray-600 text-sm whitespace-pre-line">
+                      {typeof selectedOrder.shipping_address === 'string' 
+                        ? selectedOrder.shipping_address 
+                        : (() => {
+                            const addr = selectedOrder.shipping_address;
+                            return `${addr.address || ''}\n${addr.city || ''}, ${addr.state || ''} ${addr.zipCode || ''}`.trim();
+                          })()
+                      }
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -416,12 +422,17 @@ export default function UserOrdersPage() {
               {selectedOrder.payment_proof_url && (
                 <div>
                   <span className="font-semibold text-gray-700">Payment Proof:</span>
-                  <div className="mt-2 relative w-full h-64 border rounded">
+                  <div className="mt-2 relative w-full h-64 border rounded-lg overflow-hidden bg-gray-50">
                     <Image
-                      src={getImageUrl(selectedOrder.payment_proof_url)}
+                      src={getImageUrl(selectedOrder.payment_proof_url, 'payment-proofs')}
                       alt="Payment proof"
                       fill
                       className="object-contain"
+                      onError={(e) => {
+                        console.error('Image load error for:', selectedOrder.payment_proof_url);
+                        e.currentTarget.src = '/placeholder-furniture.jpg';
+                      }}
+                      unoptimized
                     />
                   </div>
                 </div>

@@ -18,13 +18,13 @@ export default function NavigationLoader() {
     let progressInterval: NodeJS.Timeout;
 
     if (loading) {
-      // Simulate progress - faster updates
+      // Much faster progress - completes quickly
       progressInterval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 90) return prev;
-          return prev + 15;
+          return prev + 30; // Jump 30% at a time instead of 15%
         });
-      }, 100); // Faster interval: 100ms instead of 200ms
+      }, 50); // Even faster: 50ms instead of 100ms
     }
 
     return () => {
@@ -59,23 +59,15 @@ export default function NavigationLoader() {
 
   return (
     <>
-      {/* Top Loading Bar */}
+      {/* Top Loading Bar - Minimal and Fast */}
       <div className="fixed top-0 left-0 right-0 z-[9999] h-1 bg-primary-100">
         <div 
-          className="h-full bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-300 ease-out shadow-lg"
+          className="h-full bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-200 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
       
-      {/* Subtle Overlay with Spinner */}
-      <div className="fixed inset-0 z-[9998] bg-white bg-opacity-20 backdrop-blur-[1px] flex items-center justify-center pointer-events-none">
-        <div className="bg-white rounded-full shadow-lg p-3 animate-fade-in">
-          <div className="relative w-10 h-10">
-            <div className="absolute inset-0 border-4 border-primary-200 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-primary-600 rounded-full animate-spin border-t-transparent"></div>
-          </div>
-        </div>
-      </div>
+      {/* No overlay - just the progress bar for minimal distraction */}
     </>
   );
 }

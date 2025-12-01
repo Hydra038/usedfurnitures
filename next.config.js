@@ -15,6 +15,12 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
       },
     ],
+    // Add error handling for broken images
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Disable image optimization errors in development
+    unoptimized: process.env.NODE_ENV === 'development',
   },
 };
 

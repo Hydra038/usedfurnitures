@@ -177,7 +177,8 @@ export default function PaymentMethodsPage() {
       </div>
 
       {/* Payment Methods List */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
@@ -271,16 +272,82 @@ export default function PaymentMethodsPage() {
         </div>
       </div>
 
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {methods.map((method) => (
+          <div key={method.id} className="bg-white rounded-lg shadow-md p-4">
+            {/* Header with Order and Status */}
+            <div className="flex justify-between items-start mb-3">
+              <div className="flex items-center gap-2">
+                <GripVertical className="w-4 h-4 text-gray-400" />
+                <span className="text-xs text-gray-500">Order #{method.display_order}</span>
+              </div>
+              <span
+                className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                  method.is_enabled
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}
+              >
+                {method.is_enabled ? 'Enabled' : 'Disabled'}
+              </span>
+            </div>
+
+            {/* Payment Method Name */}
+            <div className="mb-3">
+              <h3 className="text-lg font-semibold text-gray-900">{method.name}</h3>
+              <p className="text-sm text-gray-500">{method.method_id}</p>
+            </div>
+
+            {/* Details */}
+            {method.details && (
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 uppercase mb-1">Details</p>
+                <p className="text-sm text-gray-700">{method.details}</p>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 pt-3 border-t">
+              <button
+                onClick={() => toggleEnabled(method)}
+                className={`flex-1 py-2 px-3 rounded-lg font-medium text-sm transition-colors ${
+                  method.is_enabled
+                    ? 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                    : 'bg-green-50 text-green-600 hover:bg-green-100'
+                }`}
+              >
+                {method.is_enabled ? 'Disable' : 'Enable'}
+              </button>
+              <button
+                onClick={() => openEditModal(method)}
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                title="Edit"
+              >
+                <Edit2 className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => deleteMethod(method.id)}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Delete"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h2 className="text-2xl font-bold mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">
               {editingMethod ? 'Edit Payment Method' : 'Add Payment Method'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block mb-2 font-semibold">Name *</label>
+                <label className="block mb-2 font-semibold text-sm sm:text-base">Name *</label>
                 <input
                   type="text"
                   value={formName}
@@ -291,7 +358,7 @@ export default function PaymentMethodsPage() {
                 />
               </div>
               <div>
-                <label className="block mb-2 font-semibold">Method ID *</label>
+                <label className="block mb-2 font-semibold text-sm sm:text-base">Method ID *</label>
                 <input
                   type="text"
                   value={formMethodId}
@@ -306,7 +373,7 @@ export default function PaymentMethodsPage() {
                 )}
               </div>
               <div>
-                <label className="block mb-2 font-semibold">Details</label>
+                <label className="block mb-2 font-semibold text-sm sm:text-base">Details</label>
                 <input
                   type="text"
                   value={formDetails}
@@ -326,22 +393,22 @@ export default function PaymentMethodsPage() {
                   onChange={(e) => setFormEnabled(e.target.checked)}
                   className="w-4 h-4"
                 />
-                <label htmlFor="enabled" className="font-semibold">
+                <label htmlFor="enabled" className="font-semibold text-sm sm:text-base">
                   Enabled (visible to customers)
                 </label>
               </div>
-              <div className="flex gap-2 pt-4">
+              <div className="flex flex-col sm:flex-row gap-2 pt-4">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 btn-primary"
+                  className="flex-1 btn-primary py-3 sm:py-2"
                 >
                   {loading ? 'Saving...' : editingMethod ? 'Update' : 'Add'}
                 </button>

@@ -174,13 +174,31 @@ export default function CheckoutPage() {
       // Upload payment proof if provided
       let paymentProofUrl = null;
       if (paymentProof) {
+        console.log('Uploading payment proof:', {
+          fileName: paymentProof.name,
+          fileSize: paymentProof.size,
+          fileType: paymentProof.type
+        });
+        
         const fileExt = paymentProof.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
+        
+        console.log('Generated filename:', fileName);
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('payment-proofs')
-          .upload(fileName, paymentProof);
+          .upload(fileName, paymentProof, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          alert(`Failed to upload payment proof: ${uploadError.message}. Please try again.`);
+          throw uploadError;
+        }
+        
+        console.log('Upload successful:', uploadData);
         paymentProofUrl = uploadData.path;
       }
 
@@ -246,9 +264,17 @@ export default function CheckoutPage() {
 
       if (itemsError) throw itemsError;
 
-      // Clear cart and redirect
-      clearCart();
-      router.push(`/confirmation?orderId=${orderData.id}`);
+      // Redirect first, then clear cart to avoid showing empty cart page
+      const orderId = orderData.id;
+      
+      // Use replace instead of push to avoid back button showing checkout with empty cart
+      router.replace(`/confirmation?orderId=${orderId}`);
+      
+      // Clear cart after redirect starts
+      setTimeout(() => {
+        clearCart();
+      }, 100);
+      
     } catch (error) {
       console.error('Error creating order:', error);
       alert('There was an error processing your order. Please try again.');

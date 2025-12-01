@@ -107,7 +107,7 @@ export default function AdminOrdersPage() {
 
   async function downloadPaymentProof(paymentProofUrl: string, customerName: string) {
     try {
-      const imageUrl = getImageUrl(paymentProofUrl);
+      const imageUrl = getImageUrl(paymentProofUrl, 'payment-proofs');
       
       // Fetch the image
       const response = await fetch(imageUrl);
@@ -138,99 +138,185 @@ export default function AdminOrdersPage() {
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {orders.map((order) => (
-                <tr key={order.id}>
-                  <td className="px-6 py-4 text-sm">
-                    {new Date(order.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4">{order.customer_name}</td>
-                  <td className="px-6 py-4 text-sm">{order.customer_email}</td>
-                  <td className="px-6 py-4 font-semibold">${((order.total || order.total_price || 0)).toFixed(2)}</td>
-                  <td className="px-6 py-4 text-sm capitalize">{order.payment_method}</td>
-                  <td className="px-6 py-4">
-                    <select
-                      value={order.status || order.payment_status || 'pending'}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        updateOrderStatus(order.id, e.target.value);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold border-2 cursor-pointer ${
-                        (order.status || order.payment_status) === 'confirmed' || (order.status || order.payment_status) === 'delivered'
-                          ? 'bg-green-100 text-green-800 border-green-300'
-                          : (order.status || order.payment_status) === 'processing' || (order.status || order.payment_status) === 'shipped'
-                          ? 'bg-blue-100 text-blue-800 border-blue-300'
-                          : (order.status || order.payment_status) === 'rejected' || (order.status || order.payment_status) === 'cancelled'
-                          ? 'bg-red-100 text-red-800 border-red-300'
-                          : 'bg-yellow-100 text-yellow-800 border-yellow-300'
-                      }`}
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="processing">Processing</option>
-                      <option value="shipped">Shipped</option>
-                      <option value="delivered">Delivered</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setSelectedOrder(order)}
-                        className="text-blue-600 hover:text-blue-800 p-1"
-                        title="View Details"
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteOrder(order.id);
-                        }}
-                        className="text-red-600 hover:text-red-800 p-1"
-                        title="Delete Order"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </td>
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y">
+                {orders.map((order) => (
+                  <tr key={order.id}>
+                    <td className="px-6 py-4 text-sm">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4">{order.customer_name}</td>
+                    <td className="px-6 py-4 text-sm">{order.customer_email}</td>
+                    <td className="px-6 py-4 font-semibold">${((order.total || order.total_price || 0)).toFixed(2)}</td>
+                    <td className="px-6 py-4 text-sm capitalize">{order.payment_method}</td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={order.status || order.payment_status || 'pending'}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          updateOrderStatus(order.id, e.target.value);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold border-2 cursor-pointer ${
+                          (order.status || order.payment_status) === 'confirmed' || (order.status || order.payment_status) === 'delivered'
+                            ? 'bg-green-100 text-green-800 border-green-300'
+                            : (order.status || order.payment_status) === 'processing' || (order.status || order.payment_status) === 'shipped'
+                            ? 'bg-blue-100 text-blue-800 border-blue-300'
+                            : (order.status || order.payment_status) === 'rejected' || (order.status || order.payment_status) === 'cancelled'
+                            ? 'bg-red-100 text-red-800 border-red-300'
+                            : 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                        }`}
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setSelectedOrder(order)}
+                          className="text-blue-600 hover:text-blue-800 p-1"
+                          title="View Details"
+                        >
+                          <Eye className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteOrder(order.id);
+                          }}
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Delete Order"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {orders.map((order) => (
+              <div key={order.id} className="bg-white rounded-lg shadow-md p-4">
+                {/* Header with Date and Actions */}
+                <div className="flex justify-between items-start mb-3">
+                  <div className="text-xs text-gray-500">
+                    {new Date(order.created_at).toLocaleDateString()}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="text-blue-600 hover:text-blue-800 p-1"
+                      title="View Details"
+                    >
+                      <Eye className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteOrder(order.id);
+                      }}
+                      className="text-red-600 hover:text-red-800 p-1"
+                      title="Delete Order"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Customer Info */}
+                <div className="mb-3">
+                  <div className="font-semibold text-lg">{order.customer_name}</div>
+                  <div className="text-sm text-gray-600">{order.customer_email}</div>
+                </div>
+
+                {/* Order Details */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase">Total</div>
+                    <div className="font-semibold text-lg">
+                      ${((order.total || order.total_price || 0)).toFixed(2)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase">Payment</div>
+                    <div className="text-sm capitalize">{order.payment_method}</div>
+                  </div>
+                </div>
+
+                {/* Status Selector */}
+                <div>
+                  <div className="text-xs text-gray-500 uppercase mb-1">Status</div>
+                  <select
+                    value={order.status || order.payment_status || 'pending'}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      updateOrderStatus(order.id, e.target.value);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    className={`w-full px-3 py-2 rounded-lg text-sm font-semibold border-2 cursor-pointer ${
+                      (order.status || order.payment_status) === 'confirmed' || (order.status || order.payment_status) === 'delivered'
+                        ? 'bg-green-100 text-green-800 border-green-300'
+                        : (order.status || order.payment_status) === 'processing' || (order.status || order.payment_status) === 'shipped'
+                        ? 'bg-blue-100 text-blue-800 border-blue-300'
+                        : (order.status || order.payment_status) === 'rejected' || (order.status || order.payment_status) === 'cancelled'
+                        ? 'bg-red-100 text-red-800 border-red-300'
+                        : 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                    }`}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">Order Details</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg p-4 sm:p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">Order Details</h2>
             
             <div className="space-y-4 mb-6">
               <div>
                 <span className="font-semibold">Order ID:</span>
-                <p className="text-sm text-gray-600 font-mono">{selectedOrder.id}</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-mono break-all">{selectedOrder.id}</p>
               </div>
               <div>
                 <span className="font-semibold">Customer:</span>
                 <p>{selectedOrder.customer_name}</p>
-                <p className="text-sm text-gray-600">{selectedOrder.customer_email}</p>
+                <p className="text-sm text-gray-600 break-words">{selectedOrder.customer_email}</p>
               </div>
               <div>
                 <span className="font-semibold">Total:</span>
@@ -243,22 +329,27 @@ export default function AdminOrdersPage() {
               
               {selectedOrder.payment_proof_url && (
                 <div>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                     <span className="font-semibold">Payment Proof:</span>
                     <button
                       onClick={() => downloadPaymentProof(selectedOrder.payment_proof_url!, selectedOrder.customer_name)}
-                      className="flex items-center gap-2 px-3 py-1 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors"
+                      className="flex items-center justify-center gap-2 px-3 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       <Download className="w-4 h-4" />
                       Download
                     </button>
                   </div>
-                  <div className="mt-2 relative w-full h-64 border rounded-lg overflow-hidden">
+                  <div className="mt-2 relative w-full h-48 sm:h-64 border rounded-lg overflow-hidden bg-gray-50">
                     <Image
-                      src={getImageUrl(selectedOrder.payment_proof_url)}
+                      src={getImageUrl(selectedOrder.payment_proof_url, 'payment-proofs')}
                       alt="Payment proof"
                       fill
                       className="object-contain"
+                      onError={(e) => {
+                        console.error('Image load error for:', selectedOrder.payment_proof_url);
+                        e.currentTarget.src = '/placeholder-furniture.jpg';
+                      }}
+                      unoptimized
                     />
                   </div>
                 </div>
@@ -280,24 +371,24 @@ export default function AdminOrdersPage() {
                   <option value="rejected">Rejected</option>
                 </select>
                 <p className="text-sm text-gray-500 mt-2">
-                  Current status: <span className="font-semibold">{selectedOrder.status || selectedOrder.payment_status || 'pending'}</span>
+                  Current status: <span className="font-semibold capitalize">{selectedOrder.status || selectedOrder.payment_status || 'pending'}</span>
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
                 onClick={() => {
                   deleteOrder(selectedOrder.id);
                 }}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete Order
               </button>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="btn-secondary flex-1"
+                className="btn-secondary flex-1 py-3"
               >
                 Close
               </button>

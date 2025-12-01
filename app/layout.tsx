@@ -1,7 +1,7 @@
 import '@/app/globals.css';
 import type { Metadata } from 'next';
 import { Merriweather } from 'next/font/google';
-import Navbar from '@/components/Navbar';
+import ConditionalNavbar from '@/components/ConditionalNavbar';
 import Footer from '@/components/Footer';
 import NavigationLoader from '@/components/NavigationLoader';
 
@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={merriweather.className}>
         <NavigationLoader />
-        <Navbar />
+        <ConditionalNavbar />
         <main className="min-h-screen">{children}</main>
         <Footer />
       </body>

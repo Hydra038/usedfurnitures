@@ -2,7 +2,8 @@
 
 import { Download, Eye, X } from "lucide-react";
 import jsPDF from "jspdf";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface InvoiceProps {
   order: {
@@ -27,7 +28,40 @@ interface InvoiceProps {
 
 export default function Invoice({ order }: InvoiceProps) {
   const [showPreview, setShowPreview] = useState(false);
+  const [paymentMethodDetails, setPaymentMethodDetails] = useState<{
+    name: string;
+    details: string;
+  } | null>(null);
   const isConfirmed = (order.status || order.payment_status || 'pending').toLowerCase() === 'confirmed';
+  
+  // Fetch payment method details from database
+  useEffect(() => {
+    const fetchPaymentMethodDetails = async () => {
+      if (!order.payment_method) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('payment_methods')
+          .select('name, details')
+          .eq('method_id', order.payment_method)
+          .single();
+        
+        if (error) throw error;
+        if (data) {
+          setPaymentMethodDetails(data);
+        }
+      } catch (error) {
+        console.error('Error fetching payment method details:', error);
+        // Fallback to default
+        setPaymentMethodDetails({
+          name: order.payment_method,
+          details: 'N/A'
+        });
+      }
+    };
+    
+    fetchPaymentMethodDetails();
+  }, [order.payment_method]);
   
   // Format shipping address
   const formatAddress = (address: any): string => {
@@ -163,6 +197,26 @@ export default function Invoice({ order }: InvoiceProps) {
     doc.text(order.payment_method.toUpperCase(), pageWidth - 60, yPos);
     yPos += 10;
     
+    // Payment Made To Section (dynamic from database)
+    if (paymentMethodDetails) {
+      doc.setDrawColor(79, 70, 229); // Primary color
+      doc.setLineWidth(0.5);
+      doc.rect(20, yPos, pageWidth - 40, 20);
+      yPos += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text("Payment Made To:", 25, yPos);
+      yPos += 6;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.setTextColor(79, 70, 229); // Primary color
+      doc.text(`${paymentMethodDetails.details} - ${paymentMethodDetails.name}`, 25, yPos);
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      yPos += 10;
+    }
+    
     // Notes Section
     if (order.notes) {
       doc.setDrawColor(200, 200, 200);
@@ -236,11 +290,11 @@ export default function Invoice({ order }: InvoiceProps) {
 
       {/* Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
           <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Invoice Preview</h2>
+            <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+              <h2 className="text-lg sm:text-2xl font-bold">Invoice Preview</h2>
               <button
                 onClick={() => setShowPreview(false)}
                 className="p-2 hover:bg-gray-100 rounded-full"
@@ -250,28 +304,28 @@ export default function Invoice({ order }: InvoiceProps) {
             </div>
 
             {/* Invoice Content */}
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
               {/* Header */}
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-primary-600 mb-2">USA FURNITURES</h1>
-                <p className="text-gray-600 text-sm">Quality Furniture for Your Home</p>
-                <h2 className="text-2xl font-bold mt-4">INVOICE</h2>
+              <div className="text-center mb-6 sm:mb-8">
+                <h1 className="text-2xl sm:text-3xl font-bold text-primary-600 mb-2">USA FURNITURES</h1>
+                <p className="text-gray-600 text-xs sm:text-sm">Quality Furniture for Your Home</p>
+                <h2 className="text-xl sm:text-2xl font-bold mt-4">INVOICE</h2>
               </div>
 
-              <hr className="mb-6" />
+              <hr className="mb-4 sm:mb-6" />
 
               {/* Invoice Details */}
-              <div className="grid grid-cols-2 gap-8 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
                 {/* Left Column */}
                 <div>
                   <h3 className="font-bold mb-3">Invoice Details:</h3>
-                  <p className="text-sm mb-1">
+                  <p className="text-xs sm:text-sm mb-1">
                     <span className="font-semibold">Invoice #:</span> {order.id.substring(0, 8).toUpperCase()}
                   </p>
-                  <p className="text-sm mb-1">
+                  <p className="text-xs sm:text-sm mb-1">
                     <span className="font-semibold">Date:</span> {new Date(order.created_at).toLocaleDateString()}
                   </p>
-                  <p className="text-sm">
+                  <p className="text-xs sm:text-sm">
                     <span className="font-semibold">Status:</span>{' '}
                     <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-800 text-xs font-semibold">
                       {(order.status || order.payment_status || 'pending').toUpperCase()}
@@ -282,14 +336,14 @@ export default function Invoice({ order }: InvoiceProps) {
                 {/* Right Column */}
                 <div>
                   <h3 className="font-bold mb-3">Customer Information:</h3>
-                  <p className="text-sm mb-1">
+                  <p className="text-xs sm:text-sm mb-1 break-words">
                     <span className="font-semibold">Name:</span> {order.customer_name}
                   </p>
-                  <p className="text-sm mb-1">
+                  <p className="text-xs sm:text-sm mb-1 break-all">
                     <span className="font-semibold">Email:</span> {order.customer_email}
                   </p>
                   {order.customer_phone && (
-                    <p className="text-sm">
+                    <p className="text-xs sm:text-sm">
                       <span className="font-semibold">Phone:</span> {order.customer_phone}
                     </p>
                   )}
@@ -298,64 +352,75 @@ export default function Invoice({ order }: InvoiceProps) {
 
               {/* Shipping Address */}
               {order.shipping_address && (
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8">
                   <h3 className="font-bold mb-3">Shipping Address:</h3>
-                  <div className="bg-gray-50 p-4 rounded whitespace-pre-line text-sm">
+                  <div className="bg-gray-50 p-3 sm:p-4 rounded whitespace-pre-line text-xs sm:text-sm">
                     {formatAddress(order.shipping_address)}
                   </div>
                 </div>
               )}
 
-              <hr className="mb-6" />
+              <hr className="mb-4 sm:mb-6" />
 
               {/* Payment Information */}
-              <div className="mb-8">
-                <h3 className="font-bold text-lg mb-4">Payment Information</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
+              <div className="mb-6 sm:mb-8">
+                <h3 className="font-bold text-base sm:text-lg mb-4">Payment Information</h3>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex justify-between text-sm sm:text-base">
                     <span className="font-semibold">Payment Plan:</span>
                     <span>{(order.payment_option || 'full').toUpperCase()}</span>
                   </div>
-                  <div className="flex justify-between text-lg">
+                  <div className="flex justify-between text-base sm:text-lg">
                     <span className="font-semibold">Total Amount:</span>
                     <span>${(order.total || order.total_price || 0).toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-lg">
+                  <div className="flex justify-between text-base sm:text-lg">
                     <span className="font-semibold">Amount Paid:</span>
                     <span className="text-green-600 font-bold">
                       ${(order.amount_paid || order.total || order.total_price || 0).toFixed(2)}
                     </span>
                   </div>
                   {(order.remaining_balance || 0) > 0 && (
-                    <div className="flex justify-between text-lg">
+                    <div className="flex justify-between text-base sm:text-lg">
                       <span className="font-semibold">Remaining Balance:</span>
                       <span className="text-red-600 font-bold">
                         ${(order.remaining_balance || 0).toFixed(2)}
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-sm sm:text-base">
                     <span className="font-semibold">Payment Method:</span>
                     <span className="uppercase">{order.payment_method}</span>
                   </div>
+                  
+                  {/* Payment Made To Tag - Dynamic from Database */}
+                  {paymentMethodDetails && (
+                    <div className="mt-4 pt-4 border-t">
+                      <div className="bg-primary-50 border-2 border-primary-200 rounded-lg p-3 sm:p-4">
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2">Payment Made To:</p>
+                        <p className="font-bold text-primary-700 text-sm sm:text-base">{paymentMethodDetails.details}</p>
+                        <p className="text-xs text-gray-500 mt-1">{paymentMethodDetails.name}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Notes */}
               {order.notes && (
                 <>
-                  <hr className="mb-6" />
-                  <div className="mb-8">
+                  <hr className="mb-4 sm:mb-6" />
+                  <div className="mb-6 sm:mb-8">
                     <h3 className="font-bold mb-3">Additional Notes:</h3>
-                    <p className="text-sm text-gray-700">{order.notes}</p>
+                    <p className="text-xs sm:text-sm text-gray-700">{order.notes}</p>
                   </div>
                 </>
               )}
 
-              <hr className="mb-6" />
+              <hr className="mb-4 sm:mb-6" />
 
               {/* Footer */}
-              <div className="text-center text-gray-600 text-sm">
+              <div className="text-center text-gray-600 text-xs sm:text-sm">
                 <p className="mb-1">Thank you for your business!</p>
                 <p>For inquiries, please contact: support@usafurnitures.com</p>
               </div>
@@ -363,7 +428,7 @@ export default function Invoice({ order }: InvoiceProps) {
               {/* Confirmed Watermark */}
               {isConfirmed && (
                 <div className="text-center mt-8">
-                  <span className="inline-block text-6xl font-bold text-green-500 opacity-20 transform rotate-12">
+                  <span className="inline-block text-4xl sm:text-6xl font-bold text-green-500 opacity-20 transform rotate-12">
                     CONFIRMED
                   </span>
                 </div>
@@ -371,10 +436,10 @@ export default function Invoice({ order }: InvoiceProps) {
             </div>
 
             {/* Modal Footer */}
-            <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex justify-end gap-3">
+            <div className="sticky bottom-0 bg-white border-t px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => setShowPreview(false)}
-                className="px-4 py-2 btn-secondary"
+                className="px-4 py-3 sm:py-2 btn-secondary"
               >
                 Close
               </button>
@@ -383,7 +448,7 @@ export default function Invoice({ order }: InvoiceProps) {
                   generateInvoicePDF();
                   setShowPreview(false);
                 }}
-                className="px-4 py-2 btn-primary flex items-center gap-2"
+                className="px-4 py-3 sm:py-2 btn-primary flex items-center justify-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 Download PDF

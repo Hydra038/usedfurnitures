@@ -656,71 +656,77 @@ export default function UserDashboard() {
 
       {/* Order Details Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-screen overflow-y-auto">
-            <div className="flex justify-between items-start mb-6">
-              <h2 className="text-2xl font-bold">Order Details</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg p-3 sm:p-6 max-w-2xl w-full max-h-[95vh] sm:max-h-screen overflow-y-auto">
+            <div className="flex justify-between items-start mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold">Order Details</h2>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 p-1"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <span className="font-semibold text-gray-700">Order ID:</span>
-                <p className="text-sm text-gray-600 font-mono mt-1">{selectedOrder.id}</p>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Order ID:</span>
+                <p className="text-xs sm:text-sm text-gray-600 font-mono mt-1 break-all">{selectedOrder.id}</p>
               </div>
 
               <div>
-                <span className="font-semibold text-gray-700">Order Date:</span>
-                <p className="text-gray-600 mt-1">{new Date(selectedOrder.created_at).toLocaleString()}</p>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Order Date:</span>
+                <p className="text-gray-600 mt-1 text-sm sm:text-base">{new Date(selectedOrder.created_at).toLocaleString()}</p>
               </div>
 
               <div>
-                <span className="font-semibold text-gray-700">Customer Name:</span>
-                <p className="text-gray-600 mt-1">{selectedOrder.customer_name}</p>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Customer Name:</span>
+                <p className="text-gray-600 mt-1 text-sm sm:text-base">{selectedOrder.customer_name}</p>
               </div>
 
               <div>
-                <span className="font-semibold text-gray-700">Email:</span>
-                <p className="text-gray-600 mt-1">{selectedOrder.customer_email}</p>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Email:</span>
+                <p className="text-gray-600 mt-1 text-sm sm:text-base break-all">{selectedOrder.customer_email}</p>
               </div>
 
               {selectedOrder.customer_phone && (
                 <div>
-                  <span className="font-semibold text-gray-700">Phone:</span>
-                  <p className="text-gray-600 mt-1">{selectedOrder.customer_phone}</p>
+                  <span className="font-semibold text-gray-700 text-sm sm:text-base">Phone:</span>
+                  <p className="text-gray-600 mt-1 text-sm sm:text-base">{selectedOrder.customer_phone}</p>
                 </div>
               )}
 
               {selectedOrder.shipping_address && (
                 <div>
-                  <span className="font-semibold text-gray-700">Shipping Address:</span>
-                  <p className="text-gray-600 mt-1 whitespace-pre-line">
-                    {typeof selectedOrder.shipping_address === 'string' 
-                      ? selectedOrder.shipping_address 
-                      : JSON.stringify(selectedOrder.shipping_address, null, 2)}
-                  </p>
+                  <span className="font-semibold text-gray-700 text-sm sm:text-base">Shipping Address:</span>
+                  <div className="mt-2 bg-gray-50 p-2 sm:p-3 rounded-lg">
+                    <p className="text-gray-600 text-xs sm:text-sm whitespace-pre-line">
+                      {typeof selectedOrder.shipping_address === 'string' 
+                        ? selectedOrder.shipping_address 
+                        : (() => {
+                            const addr = selectedOrder.shipping_address;
+                            return `${addr.address || ''}\n${addr.city || ''}, ${addr.state || ''} ${addr.zipCode || ''}`.trim();
+                          })()
+                      }
+                    </p>
+                  </div>
                 </div>
               )}
 
               <div>
-                <span className="font-semibold text-gray-700">Total Amount:</span>
-                <p className="text-2xl font-bold text-primary-600 mt-1">
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Total Amount:</span>
+                <p className="text-xl sm:text-2xl font-bold text-primary-600 mt-1">
                   ${((selectedOrder.total || selectedOrder.total_price || 0)).toFixed(2)}
                 </p>
               </div>
 
               <div>
-                <span className="font-semibold text-gray-700">Payment Method:</span>
-                <p className="text-gray-600 mt-1 capitalize">{selectedOrder.payment_method}</p>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Payment Method:</span>
+                <p className="text-gray-600 mt-1 capitalize text-sm sm:text-base">{selectedOrder.payment_method}</p>
               </div>
 
               <div>
-                <span className="font-semibold text-gray-700">Order Status:</span>
+                <span className="font-semibold text-gray-700 text-sm sm:text-base">Order Status:</span>
                 <div className="mt-2">
                   {getStatusBadge(selectedOrder.status || selectedOrder.payment_status || 'pending')}
                 </div>
@@ -728,20 +734,25 @@ export default function UserDashboard() {
 
               {selectedOrder.notes && (
                 <div>
-                  <span className="font-semibold text-gray-700">Notes:</span>
-                  <p className="text-gray-600 mt-1 whitespace-pre-line">{selectedOrder.notes}</p>
+                  <span className="font-semibold text-gray-700 text-sm sm:text-base">Notes:</span>
+                  <p className="text-gray-600 mt-1 whitespace-pre-line text-sm sm:text-base">{selectedOrder.notes}</p>
                 </div>
               )}
               
               {selectedOrder.payment_proof_url && (
                 <div>
-                  <span className="font-semibold text-gray-700">Payment Proof:</span>
-                  <div className="mt-2 relative w-full h-64 border rounded">
+                  <span className="font-semibold text-gray-700 text-sm sm:text-base">Payment Proof:</span>
+                  <div className="mt-2 relative w-full h-48 sm:h-64 border rounded-lg overflow-hidden bg-gray-50">
                     <Image
-                      src={getImageUrl(selectedOrder.payment_proof_url)}
+                      src={getImageUrl(selectedOrder.payment_proof_url, 'payment-proofs')}
                       alt="Payment proof"
                       fill
                       className="object-contain"
+                      onError={(e) => {
+                        console.error('Image load error for:', selectedOrder.payment_proof_url);
+                        e.currentTarget.src = '/placeholder-furniture.jpg';
+                      }}
+                      unoptimized
                     />
                   </div>
                 </div>
@@ -750,7 +761,7 @@ export default function UserDashboard() {
 
             <button
               onClick={() => setSelectedOrder(null)}
-              className="mt-6 w-full btn-secondary"
+              className="mt-4 sm:mt-6 w-full btn-secondary py-2 sm:py-3 text-sm sm:text-base"
             >
               Close
             </button>
