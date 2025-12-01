@@ -23,6 +23,7 @@ interface Product {
   shipping_cost: number;
   images: string[];
   video_url: string | null;
+  status: 'available' | 'reserved' | 'sold';
 }
 
 export default function ProductPage() {
@@ -182,9 +183,16 @@ export default function ProductPage() {
 
         {/* Product Info */}
         <div>
-          <div className="mb-4">
+          <div className="mb-4 flex gap-2">
             <span className="inline-block bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-semibold">
               {product.category}
+            </span>
+            <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+              product.status === 'available' ? 'bg-green-100 text-green-800' :
+              product.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
             </span>
           </div>
           
@@ -216,7 +224,7 @@ export default function ProductPage() {
           </div>
 
           {/* Add to Cart */}
-          {product.stock > 0 ? (
+          {product.stock > 0 && product.status === 'available' ? (
             <div className="space-y-4">
               <button 
                 onClick={handleAddToCart} 
@@ -233,7 +241,11 @@ export default function ProductPage() {
             </div>
           ) : (
             <div className="bg-gray-100 p-4 rounded-lg text-center">
-              <p className="text-gray-600 font-semibold">Out of Stock</p>
+              <p className="text-gray-600 font-semibold">
+                {product.status === 'sold' ? 'Sold Out' : 
+                 product.status === 'reserved' ? 'Reserved' : 
+                 'Out of Stock'}
+              </p>
             </div>
           )}
         </div>

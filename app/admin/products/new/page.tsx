@@ -22,6 +22,7 @@ export default function NewProductPage() {
   const [imageFiles, setImageFiles] = useState<FileList | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState('');
+  const [status, setStatus] = useState<'available' | 'reserved' | 'sold'>('available');
 
   const categories = [
     'Sofas & Couches',
@@ -101,6 +102,7 @@ export default function NewProductPage() {
         shipping_cost: parseFloat(shippingCost),
         images: imageUrls,
         video_url: uploadedVideoUrl || null,
+        status,
       });
 
       if (error) throw error;
@@ -173,6 +175,20 @@ export default function NewProductPage() {
                 <option value="A+">A+ (Excellent)</option>
                 <option value="A">A (Very Good)</option>
                 <option value="B">B (Good)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-2 font-semibold">Status *</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as 'available' | 'reserved' | 'sold')}
+                className="input-field"
+                required
+              >
+                <option value="available">Available</option>
+                <option value="reserved">Reserved</option>
+                <option value="sold">Sold</option>
               </select>
             </div>
 

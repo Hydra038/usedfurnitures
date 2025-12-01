@@ -16,6 +16,7 @@ interface Product {
   category: string;
   stock: number;
   images: string[];
+  status: 'available' | 'reserved' | 'sold';
 }
 
 export default function AdminProductsPage() {
@@ -55,6 +56,34 @@ export default function AdminProductsPage() {
     }
   }
 
+  async function handleStatusChange(id: string, newStatus: string) {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) throw error;
+      fetchProducts();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to update status');
+    }
+  }
+
+  function getStatusColor(status: string) {
+    switch (status) {
+      case 'available':
+        return 'bg-green-100 text-green-800';
+      case 'reserved':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'sold':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  }
+
   return (
     <div>
       <BackButton />
@@ -80,6 +109,7 @@ export default function AdminProductsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Condition</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
@@ -100,6 +130,17 @@ export default function AdminProductsPage() {
                     <td className="px-6 py-4">${product.price}</td>
                     <td className="px-6 py-4">{product.condition}</td>
                     <td className="px-6 py-4">{product.stock}</td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={product.status || 'available'}
+                        onChange={(e) => handleStatusChange(product.id, e.target.value)}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold cursor-pointer border-none outline-none ${getStatusColor(product.status || 'available')}`}
+                      >
+                        <option value="available">Available</option>
+                        <option value="reserved">Reserved</option>
+                        <option value="sold">Sold</option>
+                      </select>
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <Link
@@ -159,6 +200,18 @@ export default function AdminProductsPage() {
                   <div className="col-span-2">
                     <span className="text-gray-500">Category:</span>
                     <p className="font-medium text-gray-900">{product.category}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-500">Status:</span>
+                    <select
+                      value={product.status || 'available'}
+                      onChange={(e) => handleStatusChange(product.id, e.target.value)}
+                      className={`mt-1 px-3 py-1 rounded-full text-xs font-semibold cursor-pointer border-none outline-none w-full ${getStatusColor(product.status || 'available')}`}
+                    >
+                      <option value="available">Available</option>
+                      <option value="reserved">Reserved</option>
+                      <option value="sold">Sold</option>
+                    </select>
                   </div>
                 </div>
 

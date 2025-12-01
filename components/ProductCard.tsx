@@ -16,6 +16,7 @@ interface Product {
   category: string;
   description?: string;
   shipping_cost?: number;
+  status?: 'available' | 'reserved' | 'sold';
 }
 
 interface ProductCardProps {
@@ -67,10 +68,18 @@ export default function ProductCard({ product }: ProductCardProps) {
             fill
             className="object-cover group-hover:scale-110 transition-transform duration-300"
           />
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2 flex flex-col gap-2">
             <span className="bg-white px-3 py-1 rounded-full text-sm font-semibold shadow-md">
               {product.condition}
             </span>
+            {product.status && product.status !== 'available' && (
+              <span className={`px-3 py-1 rounded-full text-sm font-semibold shadow-md ${
+                product.status === 'reserved' ? 'bg-yellow-100 text-yellow-800' :
+                'bg-red-100 text-red-800'
+              }`}>
+                {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+              </span>
+            )}
           </div>
           
           {/* Quick View Button on Hover */}
@@ -94,15 +103,21 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Add to Cart Button */}
         <button
           onClick={handleAddToCart}
-          disabled={isAdding || isInCart}
+          disabled={isAdding || isInCart || (product.status && product.status !== 'available')}
           className={`mt-4 w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-semibold transition-all duration-300 ${
             isAdding || isInCart
               ? 'bg-green-500 text-white cursor-not-allowed'
+              : (product.status && product.status !== 'available')
+              ? 'bg-gray-400 text-white cursor-not-allowed'
               : 'bg-primary-600 hover:bg-primary-700 text-white hover:shadow-lg'
           }`}
         >
           <ShoppingCart className={`w-5 h-5 ${isAdding ? 'animate-bounce' : ''}`} />
-          {isInCart ? 'In Cart' : isAdding ? 'Added to Cart!' : 'Add to Cart'}
+          {isInCart ? 'In Cart' : 
+           isAdding ? 'Added to Cart!' : 
+           (product.status && product.status !== 'available') ? 
+             (product.status === 'sold' ? 'Sold' : 'Reserved') : 
+           'Add to Cart'}
         </button>
       </div>
     </div>

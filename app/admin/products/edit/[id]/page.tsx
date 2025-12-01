@@ -27,6 +27,7 @@ export default function EditProductPage() {
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState('');
+  const [status, setStatus] = useState<'available' | 'reserved' | 'sold'>('available');
 
   const categories = [
     'Sofas & Couches',
@@ -70,6 +71,7 @@ export default function EditProductPage() {
         setShippingCost(data.shipping_cost?.toString() || '0');
         setExistingImages(data.images || []);
         setVideoUrl(data.video_url || '');
+        setStatus(data.status || 'available');
       }
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -147,6 +149,7 @@ export default function EditProductPage() {
           shipping_cost: parseFloat(shippingCost),
           images: allImages,
           video_url: uploadedVideoUrl || null,
+          status,
         })
         .eq('id', productId);
 
@@ -220,6 +223,20 @@ export default function EditProductPage() {
                 <option value="A+">A+ (Like New)</option>
                 <option value="A">A (Excellent)</option>
                 <option value="B">B (Good)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block mb-2 font-semibold">Status *</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as 'available' | 'reserved' | 'sold')}
+                className="w-full p-2 border rounded"
+                required
+              >
+                <option value="available">Available</option>
+                <option value="reserved">Reserved</option>
+                <option value="sold">Sold</option>
               </select>
             </div>
 
