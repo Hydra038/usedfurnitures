@@ -20,6 +20,7 @@ interface Order {
   created_at: string;
   customer_name: string;
   customer_email: string;
+  customer_phone?: string;
   total_price?: number; // Old column name
   total?: number; // New column name
   payment_method: string;
@@ -180,6 +181,9 @@ export default function AdminOrdersPage() {
                     <td className="px-6 py-4">
                       <div>{order.customer_name}</div>
                       <div className="text-xs text-gray-500">{order.customer_email}</div>
+                      {order.customer_phone && (
+                        <div className="text-xs text-gray-500">{order.customer_phone}</div>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       {order.order_items && order.order_items.length > 0 ? (
@@ -285,6 +289,9 @@ export default function AdminOrdersPage() {
                 <div className="mb-3">
                   <div className="font-semibold text-lg">{order.customer_name}</div>
                   <div className="text-sm text-gray-600">{order.customer_email}</div>
+                  {order.customer_phone && (
+                    <div className="text-sm text-gray-600">{order.customer_phone}</div>
+                  )}
                 </div>
 
                 {/* Products */}
@@ -366,6 +373,9 @@ export default function AdminOrdersPage() {
                 <span className="font-semibold">Customer:</span>
                 <p>{selectedOrder.customer_name}</p>
                 <p className="text-sm text-gray-600 break-words">{selectedOrder.customer_email}</p>
+                {selectedOrder.customer_phone && (
+                  <p className="text-sm text-gray-600">{selectedOrder.customer_phone}</p>
+                )}
               </div>
               
               {/* Products Ordered */}

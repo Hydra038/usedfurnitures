@@ -336,12 +336,13 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block mb-2 font-semibold">Phone</label>
+                  <label className="block mb-2 font-semibold">Phone <span className="text-red-500">*</span></label>
                   <input
                     type="tel"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
                     className="input-field"
+                    required
                   />
                 </div>
               </div>
