@@ -7,6 +7,14 @@ import { getImageUrl } from '@/lib/utils/imageUrl';
 import { Eye, Trash2, Download } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 
+interface OrderItem {
+  id: string;
+  product_id: string;
+  product_title: string;
+  quantity: number;
+  price_at_purchase: number;
+}
+
 interface Order {
   id: string;
   created_at: string;
@@ -18,6 +26,7 @@ interface Order {
   payment_status?: string; // Old column name
   status?: string; // New column name
   payment_proof_url: string | null;
+  order_items?: OrderItem[];
 }
 
 export default function AdminOrdersPage() {
@@ -33,7 +42,16 @@ export default function AdminOrdersPage() {
     try {
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items (
+            id,
+            product_id,
+            product_title,
+            quantity,
+            price_at_purchase
+          )
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -146,7 +164,7 @@ export default function AdminOrdersPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Products</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -159,8 +177,24 @@ export default function AdminOrdersPage() {
                     <td className="px-6 py-4 text-sm">
                       {new Date(order.created_at).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4">{order.customer_name}</td>
-                    <td className="px-6 py-4 text-sm">{order.customer_email}</td>
+                    <td className="px-6 py-4">
+                      <div>{order.customer_name}</div>
+                      <div className="text-xs text-gray-500">{order.customer_email}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {order.order_items && order.order_items.length > 0 ? (
+                        <div className="space-y-1">
+                          {order.order_items.map((item) => (
+                            <div key={item.id} className="text-sm">
+                              <span className="font-medium">{item.product_title}</span>
+                              <span className="text-gray-500"> × {item.quantity}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-400 text-sm">No items</span>
+                      )}
+                    </td>
                     <td className="px-6 py-4 font-semibold">${((order.total || order.total_price || 0)).toFixed(2)}</td>
                     <td className="px-6 py-4 text-sm capitalize">{order.payment_method}</td>
                     <td className="px-6 py-4">
@@ -253,6 +287,21 @@ export default function AdminOrdersPage() {
                   <div className="text-sm text-gray-600">{order.customer_email}</div>
                 </div>
 
+                {/* Products */}
+                {order.order_items && order.order_items.length > 0 && (
+                  <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-xs text-gray-500 uppercase mb-2">Products</div>
+                    <div className="space-y-1">
+                      {order.order_items.map((item) => (
+                        <div key={item.id} className="text-sm">
+                          <span className="font-medium">{item.product_title}</span>
+                          <span className="text-gray-500"> × {item.quantity}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Order Details */}
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div>
@@ -318,6 +367,27 @@ export default function AdminOrdersPage() {
                 <p>{selectedOrder.customer_name}</p>
                 <p className="text-sm text-gray-600 break-words">{selectedOrder.customer_email}</p>
               </div>
+              
+              {/* Products Ordered */}
+              {selectedOrder.order_items && selectedOrder.order_items.length > 0 && (
+                <div>
+                  <span className="font-semibold block mb-2">Products Ordered:</span>
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                    {selectedOrder.order_items.map((item) => (
+                      <div key={item.id} className="flex justify-between items-start border-b border-gray-200 pb-2 last:border-0 last:pb-0">
+                        <div>
+                          <p className="font-medium">{item.product_title}</p>
+                          <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                        </div>
+                        <p className="font-semibold text-primary-600">
+                          ${(item.price_at_purchase * item.quantity).toFixed(2)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div>
                 <span className="font-semibold">Total:</span>
                 <p className="text-xl font-bold text-primary-600">${((selectedOrder.total || selectedOrder.total_price || 0)).toFixed(2)}</p>

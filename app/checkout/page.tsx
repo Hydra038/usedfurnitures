@@ -73,7 +73,7 @@ export default function CheckoutPage() {
   const isPaymentMethodSelected = paymentMethod && paymentMethod.trim() !== '';
   
   // Can only submit if custom amount is valid AND payment method is selected
-  const canSubmit = isCustomAmountValid && isPaymentMethodSelected;
+  const canSubmit = isCustomAmountValid && isPaymentMethodSelected && paymentProof !== null;
 
   // Fetch payment methods from database
   useEffect(() => {
@@ -153,6 +153,12 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate payment proof is uploaded
+    if (!paymentProof) {
+      alert('Please upload a payment proof screenshot before submitting your order.');
+      return;
+    }
     
     // Validate custom payment amount (minimum 25%)
     if (paymentOption === 'other') {
@@ -560,13 +566,14 @@ export default function CheckoutPage() {
                     <div>
                       <label className="block mb-2 font-semibold flex items-center gap-2">
                         <Upload className="w-4 h-4" />
-                        Upload Payment Proof (Screenshot)
+                        Upload Payment Proof (Screenshot) <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => setPaymentProof(e.target.files?.[0] || null)}
                         className="input-field"
+                        required
                       />
                       <p className="text-sm text-gray-500 mt-1">
                         Please upload a screenshot of your payment confirmation
@@ -601,6 +608,8 @@ export default function CheckoutPage() {
                   ? 'Please select a payment method'
                   : !isCustomAmountValid
                   ? 'Please enter a valid payment amount'
+                  : !paymentProof
+                  ? 'Please upload payment proof screenshot'
                   : ''
               }
             >
@@ -611,6 +620,7 @@ export default function CheckoutPage() {
               <div className="text-center text-sm text-red-500 mt-2">
                 {!isPaymentMethodSelected && '⚠️ Please select a payment method above'}
                 {isPaymentMethodSelected && !isCustomAmountValid && '⚠️ Please enter a valid custom payment amount'}
+                {isPaymentMethodSelected && isCustomAmountValid && !paymentProof && '⚠️ Please upload a payment proof screenshot'}
               </div>
             )}
           </form>
