@@ -252,6 +252,21 @@ export default function UserOrdersPage() {
                   </p>
                 </div>
                 <div>
+                  <p className="text-sm text-gray-500">Amount Paid</p>
+                  <p className="font-semibold text-green-600">
+                    ${(order.amount_paid || 0).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Balance Due</p>
+                  <p className="font-semibold text-orange-600">
+                    ${(((order.total || order.total_price || 0) - (order.amount_paid || 0))).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
                   <p className="text-sm text-gray-500">Payment Method</p>
                   <p className="font-semibold capitalize">{order.payment_method}</p>
                 </div>
@@ -358,11 +373,25 @@ export default function UserOrdersPage() {
                 </div>
               )}
 
-              <div>
-                <span className="font-semibold text-gray-700">Total Amount:</span>
-                <p className="text-2xl font-bold text-primary-600 mt-1">
-                  ${((selectedOrder.total || selectedOrder.total_price || 0)).toFixed(2)}
-                </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <span className="font-semibold block text-gray-600 text-sm">Total Amount:</span>
+                  <p className="text-xl font-bold text-primary-600 mt-1">
+                    ${((selectedOrder.total || selectedOrder.total_price || 0)).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-semibold block text-gray-600 text-sm">Amount Paid:</span>
+                  <p className="text-xl font-bold text-green-600 mt-1">
+                    ${(selectedOrder.amount_paid || 0).toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-semibold block text-gray-600 text-sm">Balance Due:</span>
+                  <p className="text-xl font-bold text-orange-600 mt-1">
+                    ${(((selectedOrder.total || selectedOrder.total_price || 0) - (selectedOrder.amount_paid || 0))).toFixed(2)}
+                  </p>
+                </div>
               </div>
 
               {/* Payment Plan Information */}

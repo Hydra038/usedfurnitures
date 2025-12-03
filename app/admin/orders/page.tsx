@@ -23,6 +23,7 @@ interface Order {
   customer_phone?: string;
   total_price?: number; // Old column name
   total?: number; // New column name
+  amount_paid?: number; // Amount customer has paid
   payment_method: string;
   payment_status?: string; // Old column name
   status?: string; // New column name
@@ -166,7 +167,7 @@ export default function AdminOrdersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Products</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total / Paid / Balance</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -199,7 +200,19 @@ export default function AdminOrdersPage() {
                         <span className="text-gray-400 text-sm">No items</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 font-semibold">${((order.total || order.total_price || 0)).toFixed(2)}</td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <div className="text-sm">
+                          <span className="text-gray-600">Total:</span> <span className="font-semibold">${((order.total || order.total_price || 0)).toFixed(2)}</span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="text-gray-600">Paid:</span> <span className="font-semibold text-green-600">${(order.amount_paid || 0).toFixed(2)}</span>
+                        </div>
+                        <div className="text-sm">
+                          <span className="text-gray-600">Balance:</span> <span className="font-semibold text-orange-600">${(((order.total || order.total_price || 0) - (order.amount_paid || 0))).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 text-sm capitalize">{order.payment_method}</td>
                     <td className="px-6 py-4">
                       <select
@@ -318,6 +331,18 @@ export default function AdminOrdersPage() {
                     </div>
                   </div>
                   <div>
+                    <div className="text-xs text-gray-500 uppercase">Paid</div>
+                    <div className="font-semibold text-lg text-green-600">
+                      ${(order.amount_paid || 0).toFixed(2)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase">Balance</div>
+                    <div className="font-semibold text-lg text-orange-600">
+                      ${(((order.total || order.total_price || 0) - (order.amount_paid || 0))).toFixed(2)}
+                    </div>
+                  </div>
+                  <div>
                     <div className="text-xs text-gray-500 uppercase">Payment</div>
                     <div className="text-sm capitalize">{order.payment_method}</div>
                   </div>
@@ -398,10 +423,21 @@ export default function AdminOrdersPage() {
                 </div>
               )}
               
-              <div>
-                <span className="font-semibold">Total:</span>
-                <p className="text-xl font-bold text-primary-600">${((selectedOrder.total || selectedOrder.total_price || 0)).toFixed(2)}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <span className="font-semibold block text-gray-600 text-sm">Total Amount:</span>
+                  <p className="text-xl font-bold text-primary-600">${((selectedOrder.total || selectedOrder.total_price || 0)).toFixed(2)}</p>
+                </div>
+                <div>
+                  <span className="font-semibold block text-gray-600 text-sm">Amount Paid:</span>
+                  <p className="text-xl font-bold text-green-600">${(selectedOrder.amount_paid || 0).toFixed(2)}</p>
+                </div>
+                <div>
+                  <span className="font-semibold block text-gray-600 text-sm">Balance Due:</span>
+                  <p className="text-xl font-bold text-orange-600">${(((selectedOrder.total || selectedOrder.total_price || 0) - (selectedOrder.amount_paid || 0))).toFixed(2)}</p>
+                </div>
               </div>
+              
               <div>
                 <span className="font-semibold">Payment Method:</span>
                 <p className="capitalize">{selectedOrder.payment_method}</p>
