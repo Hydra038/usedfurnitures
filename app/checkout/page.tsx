@@ -19,7 +19,7 @@ interface PaymentMethod {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getTotal, getTotalShipping, clearCart } = useCartStore();
+  const { items, getTotal, clearCart } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -29,6 +29,7 @@ export default function CheckoutPage() {
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [deliveryOption, setDeliveryOption] = useState<'delivery' | 'pickup'>('delivery'); // New delivery option
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -58,9 +59,12 @@ export default function CheckoutPage() {
   }, [router]);
 
   const subtotal = getTotal();
-  const shipping = getTotalShipping();
-  const fullTotal = subtotal + shipping;
-  const halfTotal = (subtotal / 2) + shipping; // Half of items price + full shipping
+  // Calculate total number of items in cart
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  // Shipping: $50 per item for delivery, $0 for pickup
+  const shippingFee = deliveryOption === 'delivery' ? (totalItems * 50) : 0;
+  const fullTotal = subtotal + shippingFee;
+  const halfTotal = (subtotal / 2) + shippingFee; // Half of items price + shipping
   const customTotal = customAmount ? parseFloat(customAmount) : 0;
   const total = paymentOption === 'half' ? halfTotal : paymentOption === 'other' ? customTotal : fullTotal;
   
@@ -236,12 +240,19 @@ export default function CheckoutPage() {
           payment_option: paymentOption, // 'full', 'half', or 'other'
           amount_paid: total, // Amount paid in this transaction
           remaining_balance: remainingBalance,
-          shipping_address: {
+          delivery_option: deliveryOption, // 'delivery' or 'pickup'
+          shipping_fee: shippingFee, // Store the shipping fee amount ($50 per item for delivery, $0 for pickup)
+          shipping_address: deliveryOption === 'delivery' ? {
             address,
             city,
             state,
             zipCode,
-          },
+          } : {
+            address: 'PICKUP - Address will be sent via email/phone',
+            city: 'N/A',
+            state: 'N/A',
+            zipCode: 'N/A',
+          }, // Placeholder for pickup orders
           payment_method: paymentMethod,
           status: 'pending', // Use 'status' not 'payment_status'
           payment_proof_url: paymentProofUrl,
@@ -348,34 +359,84 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {/* Delivery Option */}
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Delivery Method</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryOption('delivery')}
+                  className={`p-4 border-2 rounded-lg transition-all ${
+                    deliveryOption === 'delivery'
+                      ? 'border-primary-600 bg-primary-50 ring-2 ring-primary-200'
+                      : 'border-gray-300 hover:border-primary-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-lg">🚚 Delivery</span>
+                    {deliveryOption === 'delivery' && (
+                      <span className="text-primary-600 text-2xl">✓</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 mb-2">
+                    We'll deliver to your address
+                  </p>
+                  <p className="text-primary-600 font-bold">+ $50.00 delivery fee</p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryOption('pickup')}
+                  className={`p-4 border-2 rounded-lg transition-all ${
+                    deliveryOption === 'pickup'
+                      ? 'border-primary-600 bg-primary-50 ring-2 ring-primary-200'
+                      : 'border-gray-300 hover:border-primary-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold text-lg">📦 Pickup</span>
+                    {deliveryOption === 'pickup' && (
+                      <span className="text-primary-600 text-2xl">✓</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Pick up from our location
+                  </p>
+                </button>
+              </div>
+            </div>
+
             {/* Shipping Address */}
             <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
-              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Shipping Address</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block mb-2 font-semibold text-sm sm:text-base">Street Address *</label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="input-field"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">
+                {deliveryOption === 'delivery' ? 'Delivery Address' : 'Contact Information'}
+              </h2>
+              {deliveryOption === 'delivery' ? (
+                <div className="space-y-4">
                   <div>
-                    <label className="block mb-2 font-semibold text-sm sm:text-base">City *</label>
+                    <label className="block mb-2 font-semibold text-sm sm:text-base">Street Address *</label>
                     <input
                       type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
                       className="input-field"
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block mb-2 font-semibold">State *</label>
-                    <input
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block mb-2 font-semibold text-sm sm:text-base">City *</label>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className="input-field"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block mb-2 font-semibold">State *</label>
+                      <input
                       type="text"
                       value={state}
                       onChange={(e) => setState(e.target.value)}
@@ -395,6 +456,14 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </div>
+              ) : (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-800 font-medium mb-2">📍 Pickup Location</p>
+                  <p className="text-gray-700 text-sm sm:text-base">
+                    We will send you the pickup address to your email/phone after your order is confirmed.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Payment Option - Half or Full */}
@@ -658,8 +727,8 @@ export default function CheckoutPage() {
                 <span>${subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>${shipping.toFixed(2)}</span>
+                <span>Shipping {deliveryOption === 'delivery' ? `(${totalItems} item${totalItems > 1 ? 's' : ''} × $50)` : '(Pick-up)'}</span>
+                <span>${shippingFee.toFixed(2)}</span>
               </div>
               {paymentOption === 'half' && (
                 <>

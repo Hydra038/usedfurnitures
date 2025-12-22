@@ -7,11 +7,10 @@ import { Trash2 } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 
 export default function CartPage() {
-  const { items, removeItem, getTotal, getTotalShipping, clearCart } = useCartStore();
+  const { items, removeItem, getTotal, clearCart } = useCartStore();
 
   const subtotal = getTotal();
-  const shipping = getTotalShipping();
-  const total = subtotal + shipping;
+  const total = subtotal; // Shipping fee will be added at checkout based on delivery option
 
   if (items.length === 0) {
     return (
@@ -50,7 +49,6 @@ export default function CartPage() {
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-base sm:text-lg mb-1 truncate">{item.title}</h3>
                 <p className="text-primary-600 font-bold text-sm sm:text-base">${item.price}</p>
-                <p className="text-xs sm:text-sm text-gray-500">Shipping: ${item.shippingCost}</p>
               </div>
 
               <div className="flex flex-col items-end justify-center flex-shrink-0">
@@ -83,15 +81,15 @@ export default function CartPage() {
                 <span>Subtotal</span>
                 <span>${subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>${shipping.toFixed(2)}</span>
-              </div>
               <div className="border-t pt-2 flex justify-between font-bold text-lg">
                 <span>Total</span>
                 <span className="text-primary-600">${total.toFixed(2)}</span>
               </div>
             </div>
+
+            <p className="text-xs text-gray-500 mb-4">
+              Shipping fee will be calculated at checkout based on delivery option
+            </p>
 
             <Link href="/checkout" className="btn-primary w-full block text-center">
               Proceed to Checkout
