@@ -1,22 +1,22 @@
-# 🪑 Furniture Store - Full-Stack E-commerce Platform
+# 🏪 P2P Marketplace System - Full-Stack E-commerce Platform
 
-A production-ready Next.js 14 furniture e-commerce store with admin dashboard, alternative payment methods, and Supabase backend.
+A production-ready Next.js 14 peer-to-peer marketplace with admin dashboard, alternative payment methods, and Supabase backend.
 
 ## 🌟 Features
 
 ### Customer Features
-- 🏠 **Browse Furniture** - Shop second-hand furniture with category filtering
+- 🏠 **Browse Listings** - Shop items on the peer-to-peer marketplace with category filtering
 - 🛒 **Shopping Cart** - Add/remove items, adjust quantities
 - 💳 **Alternative Payments** - Venmo, Cash App, Zelle, Chime, PayPal, Apple Pay
 - 📸 **Payment Proof** - Upload payment screenshots or enter transaction IDs
 - 📦 **Order Tracking** - View order status and confirmation
 - 📱 **Responsive Design** - Mobile-friendly interface
-- 💬 **Contact Form** - Request custom furniture or ask questions
+- 💬 **Contact Form** - Request custom items or ask questions
 
 ### Admin Features
 - 🔐 **Secure Authentication** - Email/password login via Supabase
 - 📊 **Dashboard** - View products, orders, revenue stats
-- ➕ **Product Management** - Create, edit, delete furniture listings
+- ➕ **Product Management** - Create, edit, delete marketplace listings
 - 🖼️ **Image Upload** - Multiple images per product via Supabase Storage
 - 📋 **Order Management** - Review orders, view payment proofs, confirm/reject
 - 🔄 **Real-time Updates** - Instant database sync
@@ -36,7 +36,7 @@ A production-ready Next.js 14 furniture e-commerce store with admin dashboard, a
 ## 📁 Project Structure
 
 ```
-FurnitureStore/
+p2p-marketplace-system/
 ├── app/
 │   ├── layout.tsx                 # Root layout with navbar/footer
 │   ├── page.tsx                   # Home page
@@ -85,7 +85,7 @@ FurnitureStore/
 ### 1. Clone & Install
 
 ```bash
-cd FurnitureStore
+cd p2p-marketplace-system
 npm install
 ```
 
@@ -120,7 +120,7 @@ NEXT_PUBLIC_PAYPAL_EMAIL=your@paypal.com
 
 # Email (Optional - for future notifications)
 RESEND_API_KEY=re_xxxxxxxxxxxxx
-RESEND_FROM_EMAIL=orders@furniturestore.com
+RESEND_FROM_EMAIL=orders@p2pmarketplace.com
 ```
 
 **Getting Supabase Credentials:**
@@ -141,7 +141,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ### For Customers
 
 1. **Browse Products**
-   - Visit `/shop` to see all furniture
+   - Visit `/shop` to see all marketplace listings
    - Filter by category
    - Click product for details
 
@@ -330,7 +330,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 For questions or issues:
 - Open GitHub issue
-- Contact: support@furniturestore.com
+- Contact: support@p2pmarketplace.com
 
 ---
 
